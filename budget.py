@@ -57,4 +57,48 @@ class Category:
 
 
 def create_spend_chart(categories):
-    return "Hello"
+    total_withdrawal = 0
+    category_withdrawal_list = []
+    longest_string = ""
+    for category in categories:
+        if(len(category.name) > len(longest_string)):
+            longest_string = category.name
+        category_withdrawal = 0
+        for transaction in category.ledger:
+            if(transaction['amount'] < 0):
+                category_withdrawal += (transaction['amount']*-1)
+        category_withdrawal_list.append({"name": category.name, "total_withdrawal": category_withdrawal})
+        total_withdrawal += category_withdrawal
+
+    str_output = ""
+    for x in reversed(range(0, 101, 10)):
+        if(x == 100):
+            string_line = str(x)+"| "
+        elif( x == 0):
+            string_line = "  "+str(x)+"| "
+        else:
+            string_line = " "+str(x)+"| "
+        for category in category_withdrawal_list:
+            percentage = 100 / total_withdrawal * category['total_withdrawal']
+            if(percentage > x):
+                string_line += "o"
+            else:
+                string_line += " "
+            string_line += "  "
+        string_line += "\n"
+        str_output += string_line
+    if(len(category_withdrawal_list) == 1):
+        horizontal_line = "-"*4
+    else:
+        horizontal_line = "-"*(4+(3*(len(category_withdrawal_list)-1)))
+    str_output += "    "+horizontal_line+"\n"
+    for x in range(len(longest_string)):
+        category_str = "     "
+        for category in categories:
+            if(x in range(len(category.name))):
+                category_str += category.name[x] + "  "
+            else:
+                category_str += "   "
+        str_output += category_str + "\n"
+
+    return "Percentage spent by category\n"+str_output
